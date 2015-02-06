@@ -19,6 +19,12 @@
 	Type 4: 7.0 9.0
 */
 
+/** 
+
+	BASE THE VALUES TO EACH PROCESS BY THE MAX TIMES
+
+
+**/
 
 int main(int argc, char **argv){
 
@@ -32,9 +38,25 @@ int main(int argc, char **argv){
 	if(rank == 0){
 		int i = 0;
 		for(i = 0; i < 1024; ++i){
-			queue[i] = rand() % 4;
-			printf("%d\n", queue[i]);
+			queue[i] = rand() % 5;
 		}
+		float sum = 0.0;
+		for(i = 0; i < 1024; ++i){
+			switch(queue[i]){
+				case 0:
+					sum+=3.0; break;
+				case 1:
+					sum+=5.0; break;
+				case 2:
+					sum+=6.0; break;
+				case 3:
+					sum+=7.5; break;
+				case 4:
+					sum+=9.0; break;
+			}
+		}
+
+		printf("Curr total time: %lf\n", sum);
 	}
 
 
