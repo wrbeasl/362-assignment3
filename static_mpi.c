@@ -9,6 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <time.h>
+#include <math.h>
+
+#define MAX_LOAD 1024
 
 /*
 	References:
@@ -28,39 +32,84 @@
 
 int main(int argc, char **argv){
 
-	int queue[1024];
+	int queue[MAX_LOAD];
 	int rank, size;
-
+	int i, j;
+	float maxtime, perTime;
+	int types[5];
+	float timeMax[5] = {3.0, 5.0, 6.0, 7.5, 9.0};
+	float *times;
+	
+	srand(time(NULL));
+	
+	
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Status status;
+	
+	int counts[size-1];
+	int disp[size-1];
 
 	if(rank == 0){
 		int i = 0;
-		for(i = 0; i < 1024; ++i){
+		for(i = 0; i < MAX_LOAD; ++i){
 			queue[i] = rand() % 5;
-		}
-		float sum = 0.0;
-		for(i = 0; i < 1024; ++i){
 			switch(queue[i]){
 				case 0:
-					sum+=3.0; break;
+					maxtime+=timeMax[0];
+					types[0]++;
+					break;
 				case 1:
-					sum+=5.0; break;
+					maxtime+=timeMax[1];
+					types[1]++;
+					break;
 				case 2:
-					sum+=6.0; break;
+					maxtime+=timeMax[2];
+					types[2]++;
+					break;
 				case 3:
-					sum+=7.5; break;
+					maxtime+=timeMax[3];
+					types[3]++
+					break;
 				case 4:
-					sum+=9.0; break;
+					maxtime+=timeMax[4];
+					types[4]++;
+					break;
 			}
 		}
 
-		printf("Curr total time: %lf\n", sum);
+		//printf("Curr total time: %lf\n", sum);
+		
+		perTime = floor(maxtime/(float)size-1);
+		
+		j = 0;
+		float time;
+		int total = 0;
+		for(i = 1; i < size; i++){
+			time = 0;
+			disp[i] = j;
+			while(time < perTime && total < MAX_LOAD){
+				time += timeMax[queue[j]];
+				j++;
+				counts[i]++;
+			}
+		}
+		
+		//this is where we begin setting up the sending process to the slave processes. I haven't figured a way to do this, but I think a 'for' loop might work. I'm not sure how arrays are sent beyond using scatterv, gatherv
+		//What about a for loop that sends based on the process number and sends a preliminary ID-start code and a # of processes code?
+	}
+	
+	else{
+		//This is subprocessor work area. This will need to be sent using a object of some sort, maybe. Could use tags 2 and 3 to send times and ID codes?
+	}
+	
+	if(rank == 0){
+		//Receiving area. Letting everyone know what to do here.
 	}
 
 
-
+        MPI_Finalize():
 
 	return 0;
 }
