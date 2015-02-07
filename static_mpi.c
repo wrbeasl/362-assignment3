@@ -98,10 +98,25 @@ int main(int argc, char **argv){
 		
 		//this is where we begin setting up the sending process to the slave processes. I haven't figured a way to do this, but I think a 'for' loop might work. I'm not sure how arrays are sent beyond using scatterv, gatherv
 		//What about a for loop that sends based on the process number and sends a preliminary ID-start code and a # of processes code?
+		for(i = 1; i < size; i++){
+			MPI_Send(&counts[i-1], 1, MPI_INT, i, 2, MPI_COMM_WORLD);
+			MPI_Send(&disp[i-1], 1, MPI_INT, i, 3, MPI_COMM_WORLD);
+		}
+		
+		for(i = 1; i < size; i++){
+			MPI_Send(&queue[disp[i-1]], counts[i-1], MPI_INT, i, 4, MPI_COMM_WORLD);
+		}
 	}
 	
 	else{
 		//This is subprocessor work area. This will need to be sent using a object of some sort, maybe. Could use tags 2 and 3 to send times and ID codes?
+		int numElem, startPoint;
+		MPI_Recv(&numElem, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
+		MPI_Recv(&startPoint, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
+		
+		int jobs[numElem];
+		
+		MPI_Recv(&jobs, numElem, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
 	}
 	
 	if(rank == 0){
