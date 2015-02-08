@@ -40,16 +40,29 @@ int main(int argc, char **argv){
 	float timeMax[5] = {3.0, 5.0, 6.0, 7.5, 9.0};
 	float *times;
 	
+	double start, end;
+	
 	srand(time(NULL));
 	
 	
 	MPI_Init(&argc, &argv);
+	start = MPI_Wtime();
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Status status;
 	
 	int counts[size-1];
 	int disp[size-1];
+	
+	float workSleep[size - 1];
+	float workSleepAvg[size - 1];
+	float typeSleep[5];
+	float typeSleepAvg[5];
+	
+	for(i = 0; i < size-1; i++){
+		counts[i] = 0;
+		disp[i] = 0;
+	}
 
 	if(rank == 0){
 		int i = 0;
@@ -106,6 +119,29 @@ int main(int argc, char **argv){
 		for(i = 1; i < size; i++){
 			MPI_Send(&queue[disp[i-1]], counts[i-1], MPI_INT, i, 4, MPI_COMM_WORLD);
 		}
+		
+		float tempSleep;
+		
+		for(i = 0; i < MAX_LOAD; i++){
+			MPI_Recv(&tempSleep, 1, MPI_FLOAT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			typeSleep[queue[status.MPI_TAG]] += tempSleep;
+			workSleep[status.MPI_SOURCE-1] += tempSleep;
+		}
+		
+		for(i = 0; i < 5; i++){
+			typeSleepAvg[i] = typeSleep[i]/types[i];
+			printf("Total time slept for type %d is %f\n", i, typeSleep[i]);
+			printf("Average time slept for type %d is %f\n", i, typeSleepAvg[i]);
+		}
+		
+		int ID;
+		
+		for(i = 0; i < size-1; i++){
+			ID = i + 1;
+			workSleepAvg[i] = workSleep[i]/counts[i];
+			printf("Total time slept for process %d is %f\n", ID, workSleep[i]);
+			printf("Average time slept for process %d is %f\n", ID, workSleepAvg[i]);
+		}
 	}
 	
 	else{
@@ -115,8 +151,7 @@ int main(int argc, char **argv){
 		MPI_Recv(&startPoint, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
 		
 		int jobs[numElem];
-		float jobTime[numElem];
-		
+		int tag;
 		
 		MPI_Recv(&jobs, numElem, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
 		
@@ -146,15 +181,10 @@ int main(int argc, char **argv){
 					break;
 			}
 			
-			jobTime[i] = sleepTime;
-			
-			//Good night, Sweet Prince
+			usleep((useconds_t) sleepTime * 1000);
+			tag = startPoint + i;
+			MPI_Send(&sleepTime, 1, MPI_FLOAT, 0, tag, MPI_COMM_WORLD);
 			}
-		}
-	}
-	
-	if(rank == 0){
-		//Receiving area. Letting everyone know what to do here.
 	}
 
 
