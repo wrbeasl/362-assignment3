@@ -115,11 +115,41 @@ int main(int argc, char **argv){
 		MPI_Recv(&startPoint, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status);
 		
 		int jobs[numElem];
+		float jobTime[numElem];
+		
 		
 		MPI_Recv(&jobs, numElem, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
 		
+		float sleepTime;
+		
 		for(i = 0; i < numElem; ++i){
-			//do work and such
+			sleepTime = ((float)rand()/(float)(RAND_MAX));
+			switch(jobs[i]){
+				case 0:
+					sleepTime *= 3.0;
+					break;
+				case 1:
+					sleepTime *= 3.0;
+					sleepTime += 2.0;
+					break;
+				case 2:
+					sleepTime *= 5.0;
+					sleepTime += 1.0;
+					break;
+				case 3:
+					sleepTime *= 2.5;
+					sleepTime += 5.0;
+					break;
+				case 4:
+					sleepTime *= 2.0;
+					sleepTime += 7.0
+					break;
+			}
+			
+			jobTime[i] = sleepTime;
+			
+			//Good night, Sweet Prince
+			}
 		}
 	}
 	
