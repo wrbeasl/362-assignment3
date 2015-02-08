@@ -81,18 +81,18 @@ int main(int argc, char **argv){
 
 		//printf("Curr total time: %lf\n", sum);
 		
-		perTime = floor(maxtime/(float)size-1);
+		perTime = floor(maxtime/((float)size-1));
 		
 		j = 0;
 		float time;
 		int total = 0;
 		for(i = 1; i < size; i++){
 			time = 0;
-			disp[i] = j;
-			while(time < perTime && total < MAX_LOAD){
+			disp[i-1] = j;
+			while(time < perTime && j < MAX_LOAD){
 				time += timeMax[queue[j]];
 				j++;
-				counts[i]++;
+				counts[i-1]++;
 			}
 		}
 		
@@ -117,6 +117,10 @@ int main(int argc, char **argv){
 		int jobs[numElem];
 		
 		MPI_Recv(&jobs, numElem, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
+		
+		for(i = 0; i < numElem; ++i){
+			//do work and such
+		}
 	}
 	
 	if(rank == 0){
