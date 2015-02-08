@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#PBS -M <your email here>
+#PBS -l select=4:ncpus=8:mem=8gb
+#PBS -N workload_test
+#PBS -l walltime=16:00:00
+
+cd $PBS_O_WORKDIR
+
+module add gcc/4.4 mpich2/1.4-eth
+
+mpicc -o static.out static_mpi.c
+mpicc -o dynamic.out dynamic_mpi.c
+
+for i in 2, 5, 7, 9, 11, 13
+do
+	mpirun -np $i ./static.out >> static.txt
+	mpirun -np $i ./dynamic.out >> dynamic.txt
+done
+
+rm static.out
+rm dynamic.out
