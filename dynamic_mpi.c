@@ -116,9 +116,13 @@ int main(int argc, char **argv){
 			MPI_Send(&counts[i-1], 1, MPI_INT, i, 2, MPI_COMM_WORLD);
 			MPI_Send(&disp[i-1], 1, MPI_INT, i, 3, MPI_COMM_WORLD);
 		}
-		
+
+
+		int rr = 1;
 		for(i = 1; i < size; i++){
-			MPI_Send(&queue[disp[i-1]], counts[i-1], MPI_INT, i, 4, MPI_COMM_WORLD);
+			if(rr > size) rr = 1;
+			MPI_Send(&queue[disp[i-1]], rr, MPI_INT, i, 4, MPI_COMM_WORLD);
+			rr++;
 		}
 		
 		float tempSleep;
