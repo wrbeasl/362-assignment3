@@ -121,7 +121,7 @@ int main(int argc, char **argv){
 		int rr = 1;
 		for(i = 1; i < size; i++){
 			if(rr > size) rr = 1;
-			MPI_Send(&queue[disp[i-1]], rr, MPI_INT, i, 4, MPI_COMM_WORLD);
+			MPI_Send(&queue[disp[i-1]], counts[i-1], MPI_INT, i, rr, MPI_COMM_WORLD);
 			rr++;
 		}
 		
