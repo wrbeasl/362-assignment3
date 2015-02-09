@@ -36,15 +36,15 @@ int main(int argc, char **argv){
 		int queue[MAX_LOAD];
 		int rank, size;
 		int proc_count[size-1];
-		float maxtime, perTime;
 		float timeMax[5] = {3.0, 5.0, 6.0, 7.5, 9.0};
 
-		double start, end;
+		clock_t begin, end;
+		double time_spent;
 
 		srand(time(NULL));
 
 		MPI_Init(&argc, &argv);
-		start = MPI_Wtime();
+		begin = clock();
 		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		MPI_Comm_size(MPI_COMM_WORLD, &size);
 		MPI_Status status;
@@ -68,7 +68,7 @@ int main(int argc, char **argv){
 
 		if(rank == 0){
 			int i = 0; 
-			float tempSleep;
+			float tempSleep, tempTotal;
 			for( i = 0; i < MAX_LOAD; ++i){
 				queue[i] = rand() % 5;
 				Types[queue[i]]++;
@@ -83,7 +83,6 @@ int main(int argc, char **argv){
 				MPI_Recv(&tempSleep, 1, MPI_FLOAT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 				T_Sleep[status.MPI_TAG] += tempSleep;
 				W_Sleep[status.MPI_SOURCE] += tempSleep;
-
 			}
 
 			for(i = 0; i < 5; ++i){
@@ -104,6 +103,7 @@ int main(int argc, char **argv){
 		} else {
 			int temp = 0;
 			int count = 0;
+			float total_sleep_time = 0.0;
 			while(count < MAX_LOAD){
 				MPI_Recv(&temp, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
@@ -136,6 +136,9 @@ int main(int argc, char **argv){
 		}
 
         MPI_Finalize();
+        end = clock();
 
+        time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+        printf("Total execution time: %lf\n", time_spent);
 	return 0;
 }
