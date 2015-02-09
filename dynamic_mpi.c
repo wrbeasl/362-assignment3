@@ -64,6 +64,8 @@ int main(int argc, char **argv){
 		disp[i] = 0;
 	}
 
+	printf("Test.... Size: %d, Current Process: %d \n", size, rank);
+
 	// Populate the master processes queue with workload values
 	if(rank == 0){
 		int i = 0;
