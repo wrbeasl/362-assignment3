@@ -11,6 +11,7 @@
 #include <mpi.h>
 #include <time.h>
 #include <math.h>
+#include <sys/types.h>
 
 #define MAX_LOAD 1024
 
@@ -83,7 +84,7 @@ int main(int argc, char **argv){
 					break;
 				case 3:
 					maxtime+=timeMax[3];
-					types[3]++
+					types[3]++;
 					break;
 				case 4:
 					maxtime+=timeMax[4];
@@ -177,11 +178,11 @@ int main(int argc, char **argv){
 					break;
 				case 4:
 					sleepTime *= 2.0;
-					sleepTime += 7.0
+					sleepTime += 7.0;
 					break;
 			}
 			
-			usleep((useconds_t) sleepTime * 1000);
+			usleep((useconds_t) (sleepTime * 1000);
 			tag = startPoint + i;
 			MPI_Send(&sleepTime, 1, MPI_FLOAT, 0, tag, MPI_COMM_WORLD);
 			}
