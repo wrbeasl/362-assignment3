@@ -11,6 +11,7 @@
 #include <mpi.h>
 #include <time.h>
 #include <math.h>
+#include <unistd.h>
 #include <sys/types.h>
 
 #define MAX_LOAD 1024
