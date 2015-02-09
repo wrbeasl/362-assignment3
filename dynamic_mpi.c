@@ -72,6 +72,7 @@ int main(int argc, char **argv){
 				int temp = 0;
 				MPI_Recv(&temp, 1, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
 				printf("Test2: %d\n", temp);
+				count++;
 			}
 		}
 
