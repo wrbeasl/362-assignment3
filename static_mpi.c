@@ -182,14 +182,14 @@ int main(int argc, char **argv){
 					break;
 			}
 			
-			usleep((useconds_t) (sleepTime * 1000);
+			usleep((useconds_t) (sleepTime * 1000));
 			tag = startPoint + i;
 			MPI_Send(&sleepTime, 1, MPI_FLOAT, 0, tag, MPI_COMM_WORLD);
 			}
 	}
 
 
-        MPI_Finalize():
+        MPI_Finalize();
 
 	return 0;
 }
