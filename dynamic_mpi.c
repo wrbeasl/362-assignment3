@@ -71,7 +71,7 @@ int main(int argc, char **argv){
 			while(count < MAX_LOAD){
 				int temp = 0;
 				MPI_Recv(&temp, 1, MPI_INT, 0, 4, MPI_COMM_WORLD, &status);
-				printf("Test2: %d\n", temp);
+				printf("Test2: %d count: %d\n", temp, count);
 				count++;
 			}
 		}
