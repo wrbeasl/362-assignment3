@@ -189,7 +189,8 @@ int main(int argc, char **argv){
 			}
 	}
 
-
+		end = clock();
+		if(rank == 0) printf("Total execution time: %lf\n",(double)(end - start)/CLOCKS_PER_SEC);
         MPI_Finalize();
 
 	return 0;

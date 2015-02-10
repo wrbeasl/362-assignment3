@@ -36,6 +36,7 @@ int main(int argc, char **argv){
 		int queue[MAX_LOAD];
 		int rank, size;
 		int proc_count[size-1];
+		int workLoadcount[size-1];
 		float timeMax[5] = {3.0, 5.0, 6.0, 7.5, 9.0};
 
 		clock_t begin, end;
@@ -49,7 +50,6 @@ int main(int argc, char **argv){
 		MPI_Comm_size(MPI_COMM_WORLD, &size);
 		MPI_Status status;
 
-
 		float W_Sleep[size - 1];
 		float W_Sleep_AVG[size - 1];
 		float T_Sleep[5] = { 0.0 };
@@ -60,23 +60,31 @@ int main(int argc, char **argv){
 		int j = 0, curr_rob = 1;
 		int counts[size-1];
 		int disp[size-1];
+
+		// Populate the size specified arrays
 		for(j = 1; j < size ; ++j){
 			counts[j] = 0;
 			disp[j] = 0;
 			proc_count[j] = 0;
 		}
 
+		// Begin the masters work
 		if(rank == 0){
-			int i = 0; 
+			int i = 0, tag = 0; 
 			float tempSleep, tempTotal;
+
+			// Populate the queue and incriment the Types array depending on the random value
 			for( i = 0; i < MAX_LOAD; ++i){
 				queue[i] = rand() % 5;
 				Types[queue[i]]++;
 			}
 
+			// Send one queue value to a worker and await a response from said worker
+			// Save the response in the appropriate locations
 			for(i = 0; i < MAX_LOAD; ++i){
 				if(curr_rob > size-1) curr_rob = 1;
-				MPI_Send(&queue[i], 1, MPI_INT, curr_rob, 1, MPI_COMM_WORLD);
+
+				MPI_Send(&queue[i], 1, MPI_INT, curr_rob, i, MPI_COMM_WORLD);
 				proc_count[curr_rob]++;
 				curr_rob++;
 
@@ -85,10 +93,29 @@ int main(int argc, char **argv){
 				W_Sleep[status.MPI_SOURCE] += tempSleep;
 			}
 
+			int t = 1024;
+			for(i = 1; i < size; ++i){
+				MPI_Send(&t, 1, MPI_INT, i, i, MPI_COMM_WORLD);
+			}
+
+			/* printing for loops */
+
 			for(i = 0; i < 5; ++i){
 				T_Sleep_AVG[i] = T_Sleep[i]/Types[i];
 				printf("Total time slept for type %d is %lf\n", i, T_Sleep[i]);
 				printf("Average time slept for type %d is %lf\n", i, T_Sleep_AVG[i]);
+				printf("\n");
+			}
+
+			for(i = 0; i < 5; ++i){
+				printf("Number of workloads for Type %d : %d\n", i, Types[i]);
+
+			}
+
+			printf("\n");
+
+			for(i = 1; i < size; ++i){
+				printf("Total number of workloads for process %d : %d\n", i, proc_count[i]);
 				printf("\n");
 			}
 
@@ -98,14 +125,13 @@ int main(int argc, char **argv){
 				printf("Average time slept for process %d is %lf\n", i, W_Sleep_AVG[i]);
 				printf("\n");
 			}
-
-
 		} else {
-			int temp = 0;
-			int count = 0;
+			int temp = 0, currTag = 0;
+			int i = 0;
 			float total_sleep_time = 0.0;
-			while(count < MAX_LOAD){
+			while(status.MPI_TAG <= MAX_LOAD-1){
 				MPI_Recv(&temp, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+				if(temp == 1024) break;
 
 				float sleepTime = ((float)rand()/(float)(RAND_MAX));
 
@@ -129,16 +155,15 @@ int main(int argc, char **argv){
 
 				usleep((useconds_t) (sleepTime * 1000));
 				int tag = temp;
-				MPI_Send(&sleepTime, 1, MPI_FLOAT, 0, temp, MPI_COMM_WORLD);
-				count++;
+				MPI_Send(&sleepTime, 1, MPI_FLOAT, 0, tag, MPI_COMM_WORLD);
+
 			}
 
 		}
-
-        MPI_Finalize();
         end = clock();
 
         time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-        printf("Total execution time: %lf\n", time_spent);
+        if(rank == 0) printf("Total execution time: %lf\n", time_spent);
+        MPI_Finalize();
 	return 0;
 }
