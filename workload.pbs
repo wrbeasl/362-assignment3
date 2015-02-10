@@ -12,7 +12,7 @@ module add gcc/4.4 mpich2/1.4-eth
 mpicc -o static.out static_mpi.c
 mpicc -o dynamic.out dynamic_mpi.c
 
-for i in 2, 5, 7, 9, 11, 13
+for i in 3, 5, 7, 9, 11, 13
 do
 	mpirun -np $i ./static.out >> static.txt
 	mpirun -np $i ./dynamic.out >> dynamic.txt
